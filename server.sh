@@ -1,12 +1,13 @@
 #!/bin/bash
 
 #Colors of messages
+
 RED="\e[31m"
 GREEN="\e[32m"
 BLUE="\e[34m"
 RESET="\e[0m"
 
-#Force user to run command as sudo
+#Force user to run command as root
 if [[ $EUID -ne 0 ]]; then
 	echo -e "${RED}Must be root. Use sudo.${RESET}"
 	exit 1
@@ -19,6 +20,7 @@ if ! ping -c 1 -q 8.8.8.8 &>/dev/null; then
 fi
 
 #Check Os and Linux version
+#Choose package manager
 
 if [[ -f /etc/os-release ]]; then
 	. /etc/os-release
@@ -40,6 +42,8 @@ fi
 echo -e "${BLUE}Distro: $NAME${RESET}"
 echo -e "${BLUE}Package manager: $PACKAGE_MANAGER${RESET}"
 
+#Installation and configuration of the server
+
 install_samba() {
 	echo -e "\nDownloading Samba..."
 	if [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
@@ -55,6 +59,7 @@ install_samba() {
 	fi
 	echo "${GREEN}Installation complete${RESET}"
 }
+
 configure_samba() {
 	echo -e "\nConfiguring Samba..."
 	mkdir -p /srv/samba/Public
@@ -76,7 +81,11 @@ configure_samba() {
 		read only = no
 EOL
 }
+
 configure_samba
+
+#apply the new configurations to the server
+
 if [[ $PACKAGE_MANAGER=="pacman" ]]; then
 	systemctl restart smbd
 	systemctl restart nmbd
@@ -86,6 +95,8 @@ elif [[ $PACKAGE_MANAGER=="apt" ]]; then
 	systemctl restart nmb
 fi
 
+#check if the server is active
+
 if systemctl is-active --quiet smbd; then
 	echo -e "${GREEN}[OK] samba services working.${RESET}"
 else
@@ -93,12 +104,16 @@ else
 	exit 1
 fi
 
+#check if the server is reachable
+
 if smbclient -L localhost -N > /dev/null 2>&1; then
 	echo -e "${GREEN}[OK] Samba shares accessible${RESET}"
 else
 	echo -e "${RED}[ERROR] Samba shares inaccessible${RESET}"
 	exit 1
 fi
+
+#Success message
 
 echo -e "\n${GREEN}Setup complete${RESET}"
 echo -e "Share access: \\\\$(hostname -I | awk '{print $1}')\\Public"
