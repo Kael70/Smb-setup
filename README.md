@@ -19,7 +19,7 @@ The script handles package installation, basic configuration, and verifies the S
 1. Clone the repository
 
 ```bash
-git clone https://github.com/kael70/smb-setup.git 
+git clone https://github.com/kael70/Smb-setup.git 
 cd smb-setup
 ```
 2. Make the script executable
