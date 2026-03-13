@@ -1,0 +1,13 @@
+# Ignore Samba public folder
+/srv/samba/Public/
+
+# Ignore system files
+*.swp
+*.tmp
+*.bak
+
+# Ignore logs
+*.log
+
+# Ignore OS files
+.DS_Store
